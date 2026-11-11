@@ -138,18 +138,18 @@ function abtns(){$('#ba').innerHTML=AREAS.map(k=>`<button data-k="${k[0]}" class
  document.querySelectorAll('#ba button').forEach(b=>b.onclick=()=>{AREA=b.dataset.k;abtns();hz()})}
 function hz(){
  const YS=[2022,2023,2024,2025,2026],f1=x=>x.toFixed(1).replace('.',',');
- const pick=fn=>{const v=[];list.forEach(o=>{if(o.c&&o.m&&fn(+o.m.slice(0,4))){const dy=dd(o.m,o.c);if(dy>=0)v.push(dy)}});return v};
+ const pick=fn=>{const v=[];v.r=[];list.forEach(o=>{if(o.c&&o.m&&fn(+o.m.slice(0,4))){const dy=dd(o.m,o.c);if(dy>=0){v.push(dy);v.r.push({e:o.e,i:o.m,ie:o.ie,c:o.c,d:dy})}}});return v};
  let hist=[];for(let y=2015;y<=2021;y++)hist.push([String(y),pick(z=>z==y)]);if(!hist.some(r=>r[1].length))hist=[];
  let rows=YS.map(y=>[y,pick(z=>z==y)]);
- const all=[];rows.forEach(r=>all.push(...r[1]));rows.push(['Total 2022-2026',all]);
- const minas=SEL==='Minas';if(minas){const a2=[];hist.forEach(r=>a2.push(...r[1]));rows=hist.concat([['Total 2015-2021',a2]]);hist=[]}
+ const mk=rr=>{const a=[];a.r=[];rr.forEach(r=>{a.push(...r[1]);a.r.push(...r[1].r)});return a};const all=mk(rows);rows.push(['Total 2022-2026',all]);
+ const minas=SEL==='Minas';if(minas){const a2=mk(hist);rows=hist.concat([['Total 2015-2021',a2]]);hist=[]}
  $('#hh').textContent='Tiempo de Mesa de entrada a Registrado/Concedido por año de solicitud (ingreso por Mesa de entrada)'+(SEL?' · '+SEL:' · todos los derechos');
  const mxf=rr=>Math.max(1,...rr.map(([y,v])=>v.length?stats(v)[1]:0)),mx=mxf(rows),mh=mxf(hist);
  let h='<div class="yr">'+(hist.length?'<div class="mut" style="font-size:12px;margin:0 0 -2px">Minas concedidas con solicitud entre 2015 y 2021 · el ingreso de la mayoría se estimó por el año del expediente · escala propia</div>':'');
- hist.concat(rows).forEach(([y,v],ix)=>{const s=v.length>=2?stats(v):(v.length==1?[1,v[0],NaN]:null),tot=String(y).startsWith('Total'),hs=ix<hist.length;
+ window.HZG=hist.concat(rows);hist.concat(rows).forEach(([y,v],ix)=>{const s=v.length>=2?stats(v):(v.length==1?[1,v[0],NaN]:null),tot=String(y).startsWith('Total'),hs=ix<hist.length;
   const w=s?Math.max(1.5,s[1]/(hs?mh:mx)*100):0;
   const txt=s?`<span class="bm"><b>M</b> ${f1(s[1])} d</span><span class="bm"><b>DE</b> ${isNaN(s[2])?'–':Math.round(s[2])+' d'}</span><span class="bm"><b>N</b> ${s[0]}</span>`:'<span class="bm mut">sin datos</span>';
-  h+=`<div class="yrow${tot?' tot':''}"><div class="yl">${tot?'Total':y}</div><div class="bw"><div class="bar${tot?' bt':''}" style="width:${w}%"></div></div><div class="bs">${txt}</div></div>`});
+  h+=`<div class="yrow${tot?' tot':''}"${v.length?` data-g="${ix}" title="Click para ver los expedientes" style="cursor:pointer"`:''}><div class="yl">${tot?'Total':y}</div><div class="bw"><div class="bar${tot?' bt':''}" style="width:${w}%"></div></div><div class="bs">${txt}</div></div>`});
  $('#hz').innerHTML=h+'</div>';
  const n=list.length;
  $('#hx').innerHTML=`<b>Qué se está analizando:</b> ${fm(n)} expediente${n==1?'':'s'}${SEL?' de '+SEL:' (todos los tipos de derecho)'}. Todos están <b>registrados y concedidos</b> y tienen <b>fecha de inicio</b> (ingreso por Mesa de entrada) y <b>fecha de concesión</b>.<br><b>Cómo leerlo:</b> cada fila es el año de solicitud, es decir, el año de ingreso por Mesa de entrada. La barra es la media de días entre el inicio y la concesión. Al final: M = media, DE = desviación estándar y N = cantidad de expedientes. Se excluyen los casos con concesión anterior al ingreso.${minas?' Para las Minas se muestran las solicitudes de 2015 a 2021 y el Total es el promedio general de ese período.':''}${hist.length?' Las filas de arriba son Minas concedidas con solicitud entre 2015 y 2021 ('+hist.reduce((s,r)=>s+r[1].length,0)+' en total); el Total corresponde solo a las solicitudes de 2022 a 2026.':''}`}
@@ -162,4 +162,27 @@ $('#q').addEventListener('input',()=>{const v=$('#q').value.trim().toUpperCase()
 $('#pv').onclick=()=>{const i=cur?list.indexOf(cur)-1:0;if(list[i]){$('#q').value=list[i].e;show(list[i])}};
 $('#nx').onclick=()=>{const i=cur?list.indexOf(cur)+1:0;if(list[i]){$('#q').value=list[i].e;show(list[i])}};
 btns();build();window.addEventListener('resize',()=>{clearTimeout(window.__rt);window.__rt=setTimeout(hz,150)});
-</script></body></html>
+</script><style>.yrow[data-g]:hover{background:#f1f6fb}.yrow[data-g]:hover .bar{filter:brightness(.92)}
+#mv{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:99;padding:16px}
+#mv.on{display:flex}#mb{background:#fff;border-radius:12px;max-width:640px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+#mb header{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+#mb h3{margin:0 0 4px;font-size:16px}#mb .sm{font-size:12.5px;color:var(--mut)}#mx{border:0;background:none;font-size:24px;line-height:1;cursor:pointer;color:var(--mut)}
+#mt{overflow:auto;padding:0 18px 14px}#mt table{width:100%;border-collapse:collapse;font-size:13px}#mt th{position:sticky;top:0;background:#fff;text-align:left;padding:10px 6px 6px;border-bottom:2px solid var(--line);font-size:12px;color:var(--mut)}
+#mt td{padding:6px;border-bottom:1px solid var(--line)}#mt td.n,#mt th.n{text-align:right}#mt .es{color:var(--mut);font-size:11.5px}
+#mf{padding:10px 18px;border-top:1px solid var(--line);text-align:right}#mf button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}</style>
+<div id="mv"><div id="mb" role="dialog" aria-modal="true"><header><div><h3 id="mh"></h3><div class="sm" id="ms"></div></div><button id="mx" aria-label="Cerrar">×</button></header><div id="mt"></div><div id="mf"><button id="mc">Copiar tabla</button></div></div></div>
+<script>
+(function(){const f1=x=>x.toFixed(1).replace('.',','),fd=s=>s.split('-').reverse().join('/');let cur=[];
+function open(g){const [y,v]=window.HZG[g];if(!v.length)return;const r=v.r.slice().sort((a,b)=>a.e.localeCompare(b.e));cur=r;
+ const s=stats(v),tot=String(y).startsWith('Total');
+ document.getElementById('mh').textContent=(tot?y:'Solicitudes de '+y)+(SEL?' · '+SEL:' · todos los derechos');
+ document.getElementById('ms').textContent='M '+f1(s[1])+' d · DE '+(isNaN(s[2])?'–':Math.round(s[2])+' d')+' · N '+s[0];
+ document.getElementById('mt').innerHTML='<table><thead><tr><th>N° de expediente</th><th>Fecha de ingreso</th><th>Fecha de concesión</th><th class="n">Días</th></tr></thead><tbody>'+r.map(o=>'<tr><td>'+o.e+'</td><td>'+fd(o.i)+(o.ie?' <span class="es">(estimada)</span>':'')+'</td><td>'+fd(o.c)+'</td><td class="n">'+o.d+'</td></tr>').join('')+'</tbody></table>';
+ document.getElementById('mv').classList.add('on')}
+const close=()=>document.getElementById('mv').classList.remove('on');
+document.addEventListener('click',e=>{const row=e.target.closest&&e.target.closest('.yrow[data-g]');if(row)open(+row.dataset.g);else if(e.target.id==='mv'||e.target.id==='mx')close()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+document.getElementById('mc').onclick=()=>{const t='Expediente\tIngreso\tConcesion\tDias\n'+cur.map(o=>[o.e,fd(o.i),fd(o.c),o.d].join('\t')).join('\n');try{navigator.clipboard.writeText(t);document.getElementById('mc').textContent='¡Copiado!';setTimeout(()=>document.getElementById('mc').textContent='Copiar tabla',1500)}catch(e){}};
+})();
+</script>
+</body></html>
